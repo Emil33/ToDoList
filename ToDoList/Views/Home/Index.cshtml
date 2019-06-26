@@ -1,0 +1,83 @@
+﻿@model ToDoList.Models.TaskListModel
+
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<div style="max-width:90%; align-content:center; border:10px solid black; padding:20px">
+    <form name="AddTaskForm" action="/Home/AddTask" method="post">
+        <input type="hidden" value="@Newtonsoft.Json.JsonConvert.SerializeObject(Model)" name="TaskListEncoded" />
+        <h3>To Do List:</h3><br>
+        <div class="col-md-9">
+            <textarea name="TaskDescription" id="TaskDescription" style="width:650px; height:100px; resize:none" placeholder="New Task..."></textarea>
+        </div>
+        <div class="col-md-2">
+            <input type="submit" class=".btn btn-default" ID="AddTaskButton" value="Add Task" style="Width:140px; Height:100px; font-size:25px" onclick="validateForm()" />
+        </div>
+    </form>
+
+    <div class="row">
+        <table class="table" style="width:100%">
+
+            <tr>
+                <th style="width:390px">Completed</th>
+                <th style="width:390px">Description</th>
+                <th style="width:390px">Action</th>
+            </tr>
+        </table>
+
+        @if (Model.TaskList != null)
+        {
+            foreach (var task in Model.TaskList)
+            {
+                <div class="col-md-4" style="padding-top:5px">
+                    <form action="/Home/TaskChanged" method="post">
+                        <input type="hidden" value="@Newtonsoft.Json.JsonConvert.SerializeObject(Model)" name="TaskListEncoded" />
+
+                        <input type="hidden" name="TaskID" value="@task.TaskID" />
+                        @if (task.Completed.Equals(false))
+                        {
+                            <input type="checkbox" name="Completed" ID="Completed" value="false" onclick="this.form.submit()" />
+                        }
+                        else
+                        {
+                            <input type="checkbox" name="Completed" ID="Completed" value="true" checked onclick="this.form.submit()" />
+                        }
+                    </form>
+                </div>
+
+                <div class="col-md-4" style="padding-top:5px">
+                    @if (task.Completed.Equals(false))
+                    {
+                        @Html.Raw(task.Description.Replace(System.Environment.NewLine, "<br/>"))
+                    }
+                    else
+                    {
+                        <strike>@Html.Raw(task.Description.Replace(System.Environment.NewLine, "<br/>"))</strike>
+                    }
+                </div>
+
+                <div class="col-md-4" style="padding-top:5px">
+                    <form action="/Home/TaskDeleted" method="post">
+                        <input type="hidden" value="@Newtonsoft.Json.JsonConvert.SerializeObject(Model)" name="TaskListEncoded" />
+
+                        <input type="hidden" name="TaskID" value="@task.TaskID" />
+                        <input type="submit" class=".btn btn-default" name="DeleteButton" ID="DeleteButton" value="Remove" />
+                    </form>
+                </div>
+            }
+        }
+
+    </div>
+</div>
+
+<script>
+    function validateForm() {
+        var x = document.forms["AddTaskForm"]["TaskDescription"].value;
+        x = x.trim();
+        if (x == "") {
+            alert("Task must be filled out");
+            event.preventDefault();            
+        }
+    }
+</script>
